@@ -1,7 +1,8 @@
 TCPMulportsServer
 =================
 
-DebugTool: A simple nodeJS socket server that listens to a range of ports and benchmark per connection based transfer speed
+DebugTool: A simple nodeJS socket server that listens to a range of ports and report per connection based transfer speed and other metrics.
+
 Here is a simple run case report:
 e.g. 
 
