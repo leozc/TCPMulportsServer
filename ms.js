@@ -29,17 +29,17 @@ for (var i = 0; i < myArgs.count; i++) {
 				.getTime();
 			console.log(serverId + ':CONNECTION');
 		});
-		c.on('end', function() {
-			endTS = new Date().getTime();
-
-			//report summary
-			console.log(serverId + ':startTS=' + startTS );
-			console.log(serverId + ':endTS=' + endTS );
-			console.log(serverId + ':disconnected:byteread=' + c.bytesRead + '  / ' + c.bytesRead * 8 + 'bits');
-			console.log(serverId + ':TotalTS(ms)=' + (endTS - startTS));
-			console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (endTS - startTS) * 1000));
-
-		});
+		// c.on('end', function() {
+		// 	endTS = new Date().getTime();
+		// 
+		// 	//report summary
+		// 	console.log(serverId + ':startTS=' + startTS );
+		// 	console.log(serverId + ':endTS=' + endTS );
+		// 	console.log(serverId + ':disconnected:byteread=' + c.bytesRead + '  / ' + c.bytesRead * 8 + 'bits');
+		// 	console.log(serverId + ':TotalTS(ms)=' + (endTS - startTS));
+		// 	console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (endTS - startTS) * 1000));
+		// 
+		// });
 	    c.on('close', function() {
 			endTS = new Date().getTime();
 
@@ -48,7 +48,7 @@ for (var i = 0; i < myArgs.count; i++) {
 			console.log(serverId + ':endTS=' + endTS );
 			console.log(serverId + ':disconnected:byteread=' + c.bytesRead + '  / ' + c.bytesRead * 8 + 'bits');
 			console.log(serverId + ':TotalTS(ms)=' + (endTS - startTS));
-			console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (endTS - startTS) * 1000));
+			console.log(serverId + ':finalspeed(bps)=' + (c.bytesRead * 8 / (endTS - startTS) * 1000));
 	           
 	       });
 		c.on('error', function(e) {
@@ -65,9 +65,11 @@ for (var i = 0; i < myArgs.count; i++) {
 		});
 		c.on('data', function(data) {
 			nowTS = new Date().getTime();
+			if(startTS==0)
+				startTS = nowTS;
 			totalByte +=data.length;
 			if(nowTS % 10 > 8) // quick hack, 10% chance to each current speed.
-				console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (nowTS - startTS)) * 1000 + ":TotalByte="+totalByte);
+				console.log(serverId + ':speed(bps)=' + (totalByte* 8 / (nowTS - startTS)) * 1000 + ":TotalByte="+totalByte);
 			//console.log(serverId + ':receiving=>'+data);
 		});
 		c.on('listening', function() {
