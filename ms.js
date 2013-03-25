@@ -16,14 +16,14 @@ if (myArgs.start > 0 && myArgs.count > 0 && (myArgs.start + myArgs.count < 65536
 	console.log(help);
 	process.exit(0);
 }
-
-
 var base = myArgs.start;
+
 for (var i = 0; i < myArgs.count; i++) {
 	var server = net.createServer(function(c) { //'connection' listener
 		var serverId = c.server._connectionKey;
 		var startTS = 0;
 		var endTS = 0;
+		var totalByte = 0;
 		c.on('connect', function(c) {
 			startTS = new Date()
 				.getTime();
@@ -40,12 +40,23 @@ for (var i = 0; i < myArgs.count; i++) {
 			console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (endTS - startTS) * 1000));
 
 		});
+	    c.on('close', function() {
+			endTS = new Date().getTime();
+
+			//report summary
+			console.log(serverId + ':startTS=' + startTS );
+			console.log(serverId + ':endTS=' + endTS );
+			console.log(serverId + ':disconnected:byteread=' + c.bytesRead + '  / ' + c.bytesRead * 8 + 'bits');
+			console.log(serverId + ':TotalTS(ms)=' + (endTS - startTS));
+			console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (endTS - startTS) * 1000));
+	           
+	       });
 		c.on('error', function(e) {
 			console.log(serverId + ':Error');
 		  	if (e.code == 'EADDRINUSE') {
 		    	console.log('Address in use, retrying...');
 		  	}
-			c.destory();
+			c.destroy();
 			process.exit(-1); // fail if any port used
 		});
 		c.on('timeout', function() {
@@ -54,17 +65,17 @@ for (var i = 0; i < myArgs.count; i++) {
 		});
 		c.on('data', function(data) {
 			nowTS = new Date().getTime();
+			totalByte +=data.length;
 			if(nowTS % 10 > 8) // quick hack, 10% chance to each current speed.
-				console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (nowTS - startTS)) * 1000);
+				console.log(serverId + ':speed(bps)=' + (c.bytesRead * 8 / (nowTS - startTS)) * 1000 + ":TotalByte="+totalByte);
 			//console.log(serverId + ':receiving=>'+data);
 		});
 		c.on('listening', function() {
 			console.log(serverId + ':ready');
-			//console.log(serverId + ':receiving=>'+data);
+			
 		});
-		c.pipe(c);
-	});
+		//c.pipe(c);
+	}).listen(base+i);
 	console.log("Starting " + (base + i));
-	server.listen((base + i), function() { //'listening' listener
-	});
+	
 }
